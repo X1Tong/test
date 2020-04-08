@@ -1,0 +1,180 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit|ie-comp|ie-stand">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <!--[if lt IE 9]>
+<script type="text/javascript" src="lib/html5shiv.js"></script>
+<script type="text/javascript" src="lib/respond.min.js"></script>
+<![endif]-->
+    <link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+    <link rel="stylesheet" type="text/css" href="lib/Hui-iconfont/1.0.8/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+    <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+    <!--[if IE 6]>
+<script type="text/javascript" src="lib/DD_belatedPNG_0.0.8a-min.js" ></script>
+<script>DD_belatedPNG.fix('*');</script>
+<![endif]-->
+    <title>编辑课程</title>
+    <link href="lib/webuploader/0.1.5/webuploader.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div class="page-container">
+        <div class="form form-horizontal" id="form-article-add">
+
+            <div class="row cl">
+                <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>课程名称：</label>
+                <div class="formControls col-xs-8 col-sm-9">
+                    <input type="text" class="input-text" value="" placeholder="" id="cname" name="">
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>教师编号：</label>
+                <div class="formControls col-xs-8 col-sm-9">
+                    <input type="text" class="input-text" value="" placeholder="" id="tid" name=""
+                        onkeyup="value=value.replace(/[^\d]/g,'')" placeholder="教师编号为纯数字">
+                </div>
+            </div>
+
+            <div class="row cl">
+                <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>课程分类：</label>
+                <div class="formControls col-xs-8 col-sm-9">
+                    <input type="text" class="input-text" value="" placeholder="" id="category"" name="">
+			    </div>
+            </div>
+
+            <div class=" row cl">
+                    <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>课程描述：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="text" class="input-text" value="" placeholder="" id="desc" name="">
+                    </div>
+                </div>
+
+                <div class="row cl">
+                    <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>缩略图：</label>
+                    <div class="formControls col-xs-8 col-sm-9">
+                        <input type="file" class="input-text" value="" placeholder="" id="file" name="">
+                        <button onclick="doUpload()">上传图片</button>
+                        <img src="" alt="" id="img" width=100 height=100>
+                    </div>
+                </div>
+
+
+                <div class="row cl">
+                    <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+                        <button onClick="submitCourse();" class="btn btn-secondary radius" type="button"><i
+                                class="Hui-iconfont">&#xe632;</i> 提交</button>
+                        <button onClick="layer_close();" class="btn btn-default radius"
+                            type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--_footer 作为公共模版分离出去-->
+        <script type="text/javascript" src="lib/jquery/1.9.1/jquery.min.js"></script>
+        <script type="text/javascript" src="lib/layer/2.4/layer.js"></script>
+        <script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script>
+        <script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script>
+        <!--/_footer /作为公共模版分离出去-->
+
+        <!--请在下方写此页面业务相关的脚本-->
+        <script type="text/javascript" src="lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+        <script type="text/javascript" src="lib/jquery.validation/1.14.0/validate-methods.js"></script>
+        <script type="text/javascript" src="lib/jquery.validation/1.14.0/messages_zh.js"></script>
+        <script type="text/javascript" src="lib/webuploader/0.1.5/webuploader.min.js"></script>
+        <script type="text/javascript">
+
+            // alert(localStorage.getItem('course_id'))
+            let imgurl = null
+            function article_save() {
+                alert("刷新父级的时候会自动关闭弹层。")
+                window.parent.location.reload();
+            }
+
+            // 编辑页面回显信息
+            function showInformtion() {
+
+                let id = localStorage.getItem('course_id')//获取本地存储的id
+                console.log(id)
+                $.post('http://localhost:3001/course/getInfoById', { id }, (data) => {
+                    console.log(data)
+                    console.log(data)
+                    if (data.err == 0) {
+                        $('#cname').val(data.list[0].cname)
+                        $('#tid').val(data.list[0].tid)
+                        $('#category').val(data.list[0].category)
+                        $('#desc').val(data.list[0].description)
+                        imgurl = data.list[0].img
+                        $('#img').attr('src', `http://localhost:3001${data.list[0].img}`)
+                    } else {
+                        alert(data.msg)
+                    }
+                })
+            }
+            showInformtion()
+
+            //1.上传图片
+            //2.显示图片
+            function doUpload() {
+                let file = $('#file').get(0).files[0]//获取上传的图片
+                let formdata = new FormData()//创建一个空的formdata对象
+                formdata.append('courseImg', file)
+                // formdata.get('courseImg')  //formdata  不能直接查看
+                console.log(file);
+                $.ajax({
+                    url: 'http://localhost:3001/file/upload',
+                    type: 'POST',
+                    cache: false,//不必须
+                    data: formdata,
+                    processData: false,//必须为false
+                    contentType: false,//必须为false
+                    success: function (data) {
+                        console.log(data);
+                        if (data.err == 0) {
+                            imgurl = data.img
+                            $('#img').attr('src', `http://localhost:3001${data.img}`)
+                        } else {
+                            alert('上传失败请重新上传')
+                        }
+                    }
+                })
+            }
+
+            //提交数据
+            function submitCourse() {
+                let params = {
+                    cname: $('#cname').val(),
+                    tid: $('#tid').val(),
+                    category: $('#category').val(),
+                    description: $('#desc').val(),
+                    img: imgurl
+                }
+                if ($('#cname').val() == "" || $('#tid').val() == "" || $('#category').val() == "" || $('#desc').val() == "") {
+                    alert('请把数据补充完整')
+                } else if (imgurl) {
+                    $.post('http://localhost:3001/course/update', params, (data) => {
+                        console.log(data)
+                        if (data.err === 0) {
+                            window.parent.location.reload();
+                        } else {
+                            alert(`${data.msg}`)
+                        }
+                    })
+                } else {
+                    alert('请先上传图片')
+                }
+
+            }
+        </script>
+</body>
+
+</html>
